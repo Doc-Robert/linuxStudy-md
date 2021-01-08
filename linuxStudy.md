@@ -292,6 +292,8 @@ id +用户名
 
 **运行级别示意图**
 
+
+
 ![image-20201110095435106](linuxStudy.assets/image-20201110095435106.png)
 
 
@@ -435,7 +437,7 @@ init 0 关机
 
 
 
-#### 3.4.6 touch 指令
+#### 3.4.6 touch 创建空文件
 
 touch指令 创建空文件
 
@@ -927,6 +929,29 @@ tar 指令是打包指令，最后打包的文件是.tar.gz文件
 
 ![image-20201118093900321](linuxStudy.assets/image-20201118093900321.png)
 
+
+
+
+
+
+
+### 补充 order
+
+
+>- ip查询
+>
+>
+>```shell
+>ip addr
+>```
+
+
+
+
+
+
+
+
 ## 4.linux 组管理和权限管理
 
 ### 4.1Linux组基本介绍
@@ -958,4 +983,428 @@ tar 指令是打包指令，最后打包的文件是.tar.gz文件
 > **修改文件所有者**
 >
 > - 指令：chown 用户名 文件名
+
+
+
+
+
+### 4.3 权限基本介绍
+
+![image-20201228195900717](linuxStudy.assets/image-20201228195900717.png)
+
+```shell
+[root@localhost ~]# ls -l
+总用量 8
+-rw-------. 1 root root 1616 12月 23 16:53 anaconda-ks.cfg
+-rw-r--r--. 1 root root 1664 12月 23 16:54 initial-setup-ks.cfg
+```
+
+### 4.4 rwx 权限详解
+
+- rwx作用到文件
+  - [r] 代表可读（read）：可以读取，查看
+  - [w] 代表可写（write）：可以修改，但不代表可以删除文件，删除一个文件前提条件是对该文件所在的目录有写权限，才可以删除该文件
+  - [x]代表可执行（execute）：可以被执行
+
+- rwx作用到目录
+  - [r] 代表可读（read）：可以读取，ls查看目录内容
+  - [w] 代表可写（write）：可以修改，目录内创建+删除+重命名目录
+  - [x]代表可执行（execute）：可以进入该目录
+
+
+
+**`文件及目录权限实际案例`**
+
+![image-20201228201436644](linuxStudy.assets/image-20201228201436644.png)
+
+
+
+
+
+### 4.5 修改权限-chmod
+
+- 通过chmod指令，可以修改文件或者目录的权限
+
+- 第一种方式：+、-、=变更权限
+
+  u：所有者  g：所有组  o:其他人  a:所有人（u,g,o的总和）
+
+  - chmod u=rwx,g=rx,o=x 文件目录名  ；给所有者读写的权限，给所在组读 ，执行权限，给其他人执行权限
+  - chmod o+w 文件目录名 ；给其他人增加写权限
+  - chmod a-x 文件目录名 ；给所有人出去执行权限
+
+- 第二种方式：通过数字变更权限
+
+  - 规则 ：r=4，w=2 ,x=1 ,rwx = 4+2+1 =7
+
+  - chmod u=rwx,g=rx,o=x 相当于 chmod 751 文件目录名
+
+    rwx = 4+2+1 =7
+
+    r-x = 4+1=5
+
+
+
+### 4.6 修改文件所有者-chown
+
+- chown newowner file   改变文件的所有者
+- chown newowner:newgroup file   改变用户所有者和所有组
+- -R   如果是目录 则其下所有子文件或目录递归生效
+
+改变整个目录 所有者
+
+![image-20201229144121603](linuxStudy.assets/image-20201229144121603.png)
+
+
+
+
+
+### 4.7 修改文件所在组-chgrp
+
+​	chgrp newgroup file 改变文件所有组
+
+
+
+
+
+## 5.linux 磁盘分区、挂载
+
+分区的区别
+
+![image-20201229150838093](linuxStudy.assets/image-20201229150838093.png)
+
+
+
+### Linux分区
+
+#### 原理介绍
+
+![image-20201229151349838](linuxStudy.assets/image-20201229151349838.png)
+
+ 
+
+#### 硬盘说明
+
+![image-20201229151913447](linuxStudy.assets/image-20201229151913447.png)
+
+
+
+
+
+- lsblk -f   查看当前linux 分区详情
+
+![image-20201229152345851](linuxStudy.assets/image-20201229152345851.png)
+
+![image-20201229152558928](linuxStudy.assets/image-20201229152558928.png)
+
+
+
+- 挂载案例
+
+![image-20201229152938295](linuxStudy.assets/image-20201229152938295.png)
+
+1. vm操作添加硬盘
+2. 分区     fdisk /dev/sdb
+3. 格式化  mkfs -t ext4 /dev/sdb1
+4. 挂载   先创建一个 /home/newdisk  ,挂载  mount /dev/sdb1 /home/newdisk   (临时挂载)
+
+![image-20201229154648950](linuxStudy.assets/image-20201229154648950.png)
+
+
+
+ 5.设置自动挂载/ 永久挂载 当重启系统，还可以挂载到 /home/newdisk
+
+![image-20201229154347293](linuxStudy.assets/image-20201229154347293.png)
+
+- 设置完后使用 mount -a 使其生效 
+
+
+
+卸载 其目录
+
+> umount /dev/sdb1
+
+
+
+#### 磁盘情况查询
+
+查询磁盘整体使用状况
+
+> df -h
+
+
+
+
+
+#### 查询指定目录的磁盘占用情况
+
+> du -h /目录
+
+查询指定，目录的磁盘占用情况，默认为当前目录
+
+- -s   指定目录占用大小汇总
+- -h  带计量单位
+- -a  含文件
+- --max-depth = 1 子目录深度
+- -c 列出明细的同时，增加汇总值
+
+
+
+
+
+### 磁盘情况-工作实用指令
+
+- 统计/home 目录下文件夹的文件个数
+
+> ls -l /home |grep "^-" | wc -l
+
+- 统计/home 文件夹下目录的个数
+
+> ls -l /home |grep "^d" | wc -l
+
+- 统计/home 文件夹下目录的个数,包括子文件夹里的
+
+> ls -R /home |grep "^-" | wc -l
+
+- 以树状显示结构
+
+> [root@localhost robert]# yum install tree
+>
+> 安装 tree显示插件
+>
+> [root@localhost ~]# tree 显示当前目录树状图
+
+
+
+## 6.linux 网络配置原理
+
+### 6.1 查看网络ip 和网关
+
+#### 1. 查看虚拟网络编辑器
+
+![image-20201230085402808](linuxStudy.assets/image-20201230085402808.png)
+
+#### 2.修改ip地址 （修改虚拟网络的ip）
+
+![image-20201230090009380](linuxStudy.assets/image-20201230090009380.png)
+
+#### 3.ping 测试主机间网络连通
+
+![image-20201230090148742](linuxStudy.assets/image-20201230090148742.png)
+
+### 6.2linux 网络环境配置
+
+- 自动获取
+
+会自动获取ip 但，每次获取的ip地址都可能会不一样
+
+- 指定固定ip
+
+![image-20201230092010369](linuxStudy.assets/image-20201230092010369.png)
+
+![image-20201230091648436](linuxStudy.assets/image-20201230091648436.png)
+
+
+
+
+
+
+
+## 7.linux 进程管理
+
+### 7.1进程介绍
+
+![image-20201230092216701](linuxStudy.assets/image-20201230092216701.png)
+
+
+
+#### 1.显示系统执行的进程 ps
+
+ps 可以查看目前系统中， 哪些正在执行 以及执行状况 可以不加参数
+
+![image-20201230092454157](linuxStudy.assets/image-20201230092454157.png)
+
+> - ps -a ：显示当前终端的所有进程信息
+> - ps -u：以用户的格式显示进程信息
+> - ps -x：显示后台进程运行的参数 
+
+![image-20201230093029891](linuxStudy.assets/image-20201230093029891.png)
+
+![image-20201230093022583](linuxStudy.assets/image-20201230093022583.png)
+
+`tips`：
+
+查看sshd 服务 包含进程号
+
+> root@localhost ~]# ps -aux | grep sshd
+
+![image-20201230093146665](linuxStudy.assets/image-20201230093146665.png)
+
+
+
+> - ps -ef是一全格式显示当前所有进程
+> - -e 显示所有进程 -f全格式
+
+
+
+#### 2.终止和kill 进程
+
+![image-20201230093630440](linuxStudy.assets/image-20201230093630440.png)
+
+
+
+> ps -aux | grep bash
+>
+>   查看运行的终端
+
+
+
+- 查看进程数 pstree
+
+> ![image-20201230094413223](linuxStudy.assets/image-20201230094413223.png)
+
+
+
+### 7.2 service 管理
+
+![image-20201230094820053](linuxStudy.assets/image-20201230094820053.png)
+
+
+
+> - centos7 查看防火墙 systemctl status firewalld
+
+
+
+centos 7 firewall
+
+> 1.systemctl start firewalld.service（开启防火墙）
+>
+> 2.systemctl stop firewalld.service（关闭防火墙）
+>
+> 3.service firewalld restart（从启防火墙）
+>
+> 4.firewall-cmd --zone=public --add-port=4400-4600/udp --permanen(指定端口范围为4400-4600通过防火墙)
+>
+> Warning: ALREADY_ENABLED: 3306:tcp（说明3306端口通过成功）
+>
+> 5.firewall-cmd --zone=public --remove-port=80/tcp --permanent（关闭指定端口）
+>
+> 6.firewall-cmd --zone=public --list-ports（查看通过的端口）
+>
+> 7.查看防火墙状态 ：firewall-cmd --state
+>
+> 8.修改mysql密码：SET PASSWORD = PASSWORD('123456');
+>
+> 9.flush privileges;
+>
+> 10.grant all privileges on *.* to 'root'@'%' identified by'test1234';(将所root用户的所有ip 以密码为test1234登录)
+>
+> 11.flush privileges
+
+
+
+
+
+- #### 查看服务名
+
+![image-20201230095445609](linuxStudy.assets/image-20201230095445609.png)
+
+
+
+- #### 服务运行级别
+
+![image-20201230095636056](linuxStudy.assets/image-20201230095636056.png)
+
+
+
+
+
+#### chkconfig 服务运行级别
+
+![image-20201230095849384](linuxStudy.assets/image-20201230095849384.png)
+
+
+
+> - chkconfig --list |grep xxx  查看服务
+> - chkconfig  服务名 --list
+> - chkconfig --level 5 服务名 on/off   在等级几的情况下开或关
+
+
+
+
+
+#### 动态监控进程
+
+- ##### 监控网络状态
+
+> netstat 【选项】
+>
+> netstat -anp
+
+选项：
+
+> -an 按一定顺序排列输出
+>
+> -p 显示哪个进程在调用
+
+
+
+
+
+top
+
+![image-20201230102848724](linuxStudy.assets/image-20201230102848724.png)
+
+
+
+
+
+![image-20201230111339798](linuxStudy.assets/image-20201230111339798.png)
+
+外面的ip远程登录 linux
+
+
+
+## 8.RPM 与 YUM
+
+
+
+### 8.1 rpm包的管理
+
+- rpm查询已安装rpm列表 rpm -qa | grep xx
+
+![image-20201230134528943](linuxStudy.assets/image-20201230134528943.png)
+
+![image-20201230134640032](linuxStudy.assets/image-20201230134640032.png)
+
+
+
+
+
+- 卸载rpm包 
+
+> rpm -e rpm包的名称
+
+- 安装rpm包
+
+> rpm -ivh rpm包全路径名称
+>
+> i=install 安装
+>
+> v=verbose 提示
+>
+> h=hash 进度条
+
+
+
+### 8.2yum
+
+介绍：
+
+​	![image-20201230135612088](linuxStudy.assets/image-20201230135612088.png)
+
+基本指令：
+
+> - 查询yum服务器是否有需要安装的软件 yum list | grep xx软件列表
+> - 安装指定的yum包 yum install xxx 下载安装
 
